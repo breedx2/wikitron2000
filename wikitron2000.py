@@ -2,9 +2,27 @@
 # Convert wiki markup drupal entries to html
 #
 
+import sys
 import MySQLdb
 import creds
 import urllib
+import json
+
+def wiki_to_html(wiki):
+	input_data = { 'action': 'parse', 'format': 'json', 'text': wiki, 'disablepp': 'true' }
+	data = urllib.urlencode(input_data)
+	response = urllib.urlopen("http://en.wikipedia.org/w/api.php", data=data)
+	if response.getcode() != 200:
+		raise Exception("CONVERTOTRON FAIL!! code = %d" %(response.getcode()))
+	result = response.read()
+	json_result = json.loads(result)
+	text = json_result['parse']['text']['*']
+	return text
+
+body = 'Here is a link: [http://dorkbotpdx.org/himom hi dad]'
+html = wiki_to_html(body)
+print html
+sys.exit(0)
 
 db = MySQLdb.connect(host="127.0.0.1", port=3306, user=creds.mysql_user, passwd=creds.mysql_pass, db="dorkbotpdx")
 cur = db.cursor() 
@@ -24,5 +42,4 @@ for row in cur.fetchall() :
 	(nid, title) = (row[0], row[1])
 	print("Processing node %s:  %s" %(nid, title))
 	(vid, uid, body) = fetch_body(cur, nid)
-	
-	#parts = urllib.urlencode({'
+	print body
