@@ -1,0 +1,8 @@
+
+Debian/Ubuntu system packages:
+------------------------------
+libmysqlclient-dev
+
+Python packages:
+----------------
+
