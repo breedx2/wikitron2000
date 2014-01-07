@@ -19,10 +19,11 @@ def wiki_to_html(wiki):
 	text = json_result['parse']['text']['*']
 	return text
 
-body = 'Here is a link: [http://dorkbotpdx.org/himom hi dad]'
-html = wiki_to_html(body)
-print html
-sys.exit(0)
+def fetch_body(cur, nid):
+	print("Fetching body...")
+	cur.execute("SELECT vid,uid,body from node_revisions where nid = %(nid)s order by vid desc limit 1;", {'nid': nid})
+	row = cur.fetchall()[0]
+	return (row[0], row[1], row[2])
 
 db = MySQLdb.connect(host="127.0.0.1", port=3306, user=creds.mysql_user, passwd=creds.mysql_pass, db="dorkbotpdx")
 cur = db.cursor() 
@@ -32,14 +33,10 @@ cur.execute("""SELECT n.nid, n.title, ff.name FROM node n
 			WHERE ff.name = "Mediawiki" 
 			ORDER BY n.nid;""")
 
-def fetch_body(cur, nid):
-	print("Fetching body...")
-	cur.execute("SELECT vid,uid,body from node_revisions where nid = %(nid)s order by vid desc limit 1;", {'nid': nid})
-	row = cur.fetchall()[0]
-	return (row[0], row[1], row[2])
-
 for row in cur.fetchall() :
 	(nid, title) = (row[0], row[1])
 	print("Processing node %s:  %s" %(nid, title))
 	(vid, uid, body) = fetch_body(cur, nid)
 	print body
+	print "------------------------------------------------------------"
+	print wiki_to_html(body)
