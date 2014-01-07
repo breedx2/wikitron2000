@@ -25,6 +25,12 @@ def fetch_body(cur, nid):
 	row = cur.fetchall()[0]
 	return (row[0], row[1], row[2])
 
+node_id = None
+if len(sys.argv) > 1:
+	node_id = sys.argv[1]
+
+print("Limiting selection to just node = %s" %(node_id))
+
 db = MySQLdb.connect(host="127.0.0.1", port=3306, user=creds.mysql_user, passwd=creds.mysql_pass, db="dorkbotpdx")
 cur = db.cursor() 
 cur.execute("""SELECT n.nid, n.title, ff.name FROM node n 
@@ -33,7 +39,13 @@ cur.execute("""SELECT n.nid, n.title, ff.name FROM node n
 			WHERE ff.name = "Mediawiki" 
 			ORDER BY n.nid;""")
 
-for row in cur.fetchall() :
+rows = cur.fetchall()
+if node_id:
+	print "filtering"
+	rows = filter(lambda x: x[0] == int(node_id), rows)
+	print len(rows)
+
+for row in rows:
 	(nid, title) = (row[0], row[1])
 	print("Processing node %s:  %s" %(nid, title))
 	(vid, uid, body) = fetch_body(cur, nid)
