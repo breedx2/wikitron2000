@@ -3,10 +3,21 @@
 #
 
 import sys
+import argparse
 import MySQLdb
 import creds
 import urllib
 import json
+
+parser = argparse.ArgumentParser(description='Some drupal Mediawiki -> HTML conversion')
+parser.add_argument('--nid', metavar='<nid>', type=int, help='Specify the node id to munge')
+parser.add_argument('--update', dest='update', action='store_const', const=True, default=False, help='Go all the way and update the database')
+
+args = parser.parse_args()
+node_id = args.nid
+print("Limiting selection to just node = %s" %(node_id))
+if args.update:
+	print("We will update the database.")
 
 def wiki_to_html(wiki):
 	input_data = { 'action': 'parse', 'format': 'json', 'text': wiki, 'disablepp': 'true' }
@@ -25,11 +36,9 @@ def fetch_body(cur, nid):
 	row = cur.fetchall()[0]
 	return (row[0], row[1], row[2])
 
-node_id = None
-if len(sys.argv) > 1:
-	node_id = sys.argv[1]
+def update_format(cur, nid):
+	pass
 
-print("Limiting selection to just node = %s" %(node_id))
 
 db = MySQLdb.connect(host="127.0.0.1", port=3306, user=creds.mysql_user, passwd=creds.mysql_pass, db="dorkbotpdx")
 cur = db.cursor() 
@@ -39,11 +48,8 @@ cur.execute("""SELECT n.nid, n.title, ff.name FROM node n
 			WHERE ff.name = "Mediawiki" 
 			ORDER BY n.nid;""")
 
-rows = cur.fetchall()
-if node_id:
-	print "filtering"
-	rows = filter(lambda x: x[0] == int(node_id), rows)
-	print len(rows)
+# Could have just filtered in the query, but oh wells
+rows = filter(lambda x: x[0] == int(node_id), cur.fetchall())
 
 for row in rows:
 	(nid, title) = (row[0], row[1])
