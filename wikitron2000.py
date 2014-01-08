@@ -9,6 +9,8 @@ import creds
 import urllib
 import json
 import time
+import re
+import uuid
 
 parser = argparse.ArgumentParser(description='Some drupal Mediawiki -> HTML conversion')
 parser.add_argument('--nid', metavar='<nid>', type=int, help='Specify the node id to munge')
@@ -64,6 +66,27 @@ def update_format(cur, nid, uid, title, teaser, html):
 	# Not threadsafe, but we assume we're the only ones editing at this time.  Thanks for your patience.
 	update_vid_for_nid(cur, nid)
 
+def magic_pre_mungify(body):
+	""" Replace stuff that the wiki parse fails for us, instead substitute some magic that we can 
+	later substitute."""
+	mappings = dict()
+	result = body
+	linkwads = re.findall(r'\[http://.*?\]', body)
+	for wad in linkwads:
+		if re.search(r'\.(jpg|png|gif)\]$', wad) is not None:
+			link = wad.strip('[]')
+			linkhtml = "<img alt='img' src='%s'/>" %(link)
+			magic = uuid.uuid4().hex
+			mappings[magic] = linkhtml
+			result = result.replace(wad, magic)
+	return result, mappings
+
+def magic_post_mungify(body, mappings):
+	result = body
+	for k,v in mappings.iteritems():
+		result = result.replace(k, v)
+	return result
+
 db = MySQLdb.connect(host="127.0.0.1", port=3306, user=creds.mysql_user, passwd=creds.mysql_pass, db="dorkbotpdx")
 cur = db.cursor() 
 cur.execute("""SELECT n.nid, n.title, ff.name FROM node n 
@@ -80,9 +103,11 @@ for row in rows:
 	(nid, title) = (row[0], row[1])
 	print("Processing node %s:  %s" %(nid, title))
 	(vid, uid, teaser, body) = fetch_body(cur, nid)
+	body, mappings = magic_pre_mungify(body)
 	print body
 	print "------------------------------------------------------------"
 	html = wiki_to_html(body)
+	html = magic_post_mungify(html, mappings)
 	teaser = wiki_to_html(teaser)
 	print html
 	if args.update:
