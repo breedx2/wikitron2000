@@ -73,7 +73,7 @@ def magic_pre_mungify(body):
 	result = body
 	linkwads = re.findall(r'\[http://.*?\]', body)
 	for wad in linkwads:
-		if re.search(r'\.(jpg|png|gif)\]$', wad) is not None:
+		if re.search(r'\.(JPG|jpg|PNG|png|GIF|gif)\]$', wad) is not None:
 			link = wad.strip('[]')
 			linkhtml = "<img alt='img' src='%s'/>" %(link)
 			magic = uuid.uuid4().hex
