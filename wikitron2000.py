@@ -84,10 +84,18 @@ def magic_pre_mungify(body):
 	for wad in linkwads:
 		if re.search(r'\.(JPG|jpg|PNG|png|GIF|gif)\]$', wad) is not None:
 			link = wad.strip('[]')
-			linkhtml = "<img alt='img' src='%s'/>" %(link)
+			imghtml = "<img alt='img' src='%s'/>" %(link)
 			magic = uuid.uuid4().hex
-			mappings[magic] = linkhtml
+			mappings[magic] = imghtml
 			result = result.replace(wad, magic)
+	linkwads = re.findall(r'\[\[\w+\|.+?\]\]', body)
+	for wad in linkwads:
+		link = wad.strip('[[').strip(']]')
+		wiki, text = link.split('|')
+		linkhtml = "<a href='/wiki/%s'>%s</a>" %(wiki, text)
+		magic = uuid.uuid4().hex
+		mappings[magic] = linkhtml
+		result = result.replace(wad, magic)
 	return result, mappings
 
 def magic_post_mungify(body, mappings):
