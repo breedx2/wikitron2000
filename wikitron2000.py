@@ -80,19 +80,27 @@ def magic_pre_mungify(body):
 	later substitute."""
 	mappings = dict()
 	result = body
-	linkwads = re.findall(r'\[http://.*?\]', body)
-	for wad in linkwads:
+	imgwads = re.findall(r'\[http://.*?\]', body)
+	for wad in imgwads:
 		if re.search(r'\.(JPG|jpg|PNG|png|GIF|gif)\]$', wad) is not None:
 			link = wad.strip('[]')
 			imghtml = "<img alt='img' src='%s'/>" %(link)
 			magic = uuid.uuid4().hex
 			mappings[magic] = imghtml
 			result = result.replace(wad, magic)
-	linkwads = re.findall(r'\[\[\w+\|.+?\]\]', body)
+	linkwads = re.findall(r'\[\[\w+\|.+?\]\]', result)
 	for wad in linkwads:
 		link = wad.strip('[[').strip(']]')
 		wiki, text = link.split('|')
 		linkhtml = "<a href='/wiki/%s'>%s</a>" %(wiki, text)
+		magic = uuid.uuid4().hex
+		mappings[magic] = linkhtml
+		result = result.replace(wad, magic)
+	linkwads = re.findall("\[http://[\w|\.]+ .*?\]", result)
+	for wad in linkwads:
+		link = wad.strip('[]')
+		url, text = link.split(' ', 1)
+		linkhtml = "<a href='%s'>%s</a>" %(url, text)
 		magic = uuid.uuid4().hex
 		mappings[magic] = linkhtml
 		result = result.replace(wad, magic)
