@@ -54,8 +54,16 @@ def update_vid_for_nid(cur, nid):
 	print("New version vid = %s" %(vid))
 	cur.execute("update node set vid = %s where nid = %s", (vid, nid))
 
+def update_attachments(cur, nid, old_vid):
+	vid = get_max_vid_for_nid(cur, nid)
+	cur.execute("""insert into upload (fid, vid, description, list, nid, weight)
+				select fid, %(newvid)s, description, list, nid, weight 
+				from upload
+				where nid = %(nid)s and vid = %(vid)s""", {'newvid': vid, 'nid': nid, 'vid': old_vid})
+
 def update_format(cur, nid, uid, title, teaser, html):
 	format_id = get_html_filter_format_id(cur)
+	old_vid = get_max_vid_for_nid(cur, nid)
 	print("Inserting new node revision...")
 	log = "Magic wiki -> html convertotron 2000"
 	timestamp = int(time.time())
@@ -65,6 +73,7 @@ def update_format(cur, nid, uid, title, teaser, html):
 				(nid, uid, title, html, teaser, log, timestamp, format_id))
 	# Not threadsafe, but we assume we're the only ones editing at this time.  Thanks for your patience.
 	update_vid_for_nid(cur, nid)
+	update_attachments(cur, nid, old_vid)
 
 def magic_pre_mungify(body):
 	""" Replace stuff that the wiki parse fails for us, instead substitute some magic that we can 
