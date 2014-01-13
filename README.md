@@ -1,4 +1,3 @@
-
 wikitron2000
 ============
 
@@ -18,6 +17,9 @@ Running it
 
 In the interest of not screwing up pages, I have not built something that migrates the
 entire site.  It only does a node at a time and expects to be hand-held.
+
+Clone this repo:
+`$ git clone https://github.com/breedx2/wikitron2000.git`
 
 Create a python virtualenv:
 `virtualenv --no-site-packages env`
