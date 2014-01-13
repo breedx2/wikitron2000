@@ -19,18 +19,25 @@ In the interest of not screwing up pages, I have not built something that migrat
 entire site.  It only does a node at a time and expects to be hand-held.
 
 Clone this repo:
-`$ git clone https://github.com/breedx2/wikitron2000.git`
+```
+$ git clone https://github.com/breedx2/wikitron2000.git
+```
 
 Create a python virtualenv:
-`virtualenv --no-site-packages env`
+```
+virtualenv --no-site-packages env
+```
 
 Then activate it:
-`source env/bin/activate`
+```
+source env/bin/activate
+```
 
 Install the dependencies:
-`$ sudo apt-get install libmysqlclient-dev`
-`$ easy_install MySQL-python`
-
+```
+$ sudo apt-get install libmysqlclient-dev
+$ easy_install MySQL-python
+```
 
 You will need to create `creds.py` in the directory and it should contain something like this:
 
