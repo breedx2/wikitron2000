@@ -1,4 +1,8 @@
+=======
+wikitron2000
+============
 
+A hack to assist in migration away from Drupal mediawiki markup.
 
 We will try and use this:
 http://www.mediawiki.org/wiki/API:Parsing_wikitext
