@@ -5,4 +5,5 @@ libmysqlclient-dev
 
 Python packages:
 ----------------
+MySQL-python
 
